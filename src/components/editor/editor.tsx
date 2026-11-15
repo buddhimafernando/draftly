@@ -12,6 +12,7 @@ import { ShareDialog } from "@/components/sharing/share-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import type { Collaborator, Role } from "@/types";
+import { DeleteDocumentButton } from "@/components/editor/delete-button";
 
 const STATUS_LABEL: Record<SaveStatus, string> = {
   saved: "All changes saved",
@@ -81,11 +82,14 @@ export function DocumentEditor({ id, initialTitle, initialContent, role, ownerNa
               {STATUS_LABEL[status]}
             </span>
           )}
-          {role === "owner" ? (
+        {role === "owner" ? (
+        <>
             <ShareDialog documentId={id} collaborators={collaborators} />
-          ) : (
-            <Badge variant="secondary">{role === "editor" ? "Can edit" : "View only"}</Badge>
-          )}
+            <DeleteDocumentButton documentId={id} title={savedTitle} />
+        </>
+        ) : (
+        <Badge variant="secondary">{role === "editor" ? "Can edit" : "View only"}</Badge>
+        )}
         </div>
       </div>
 

@@ -131,3 +131,17 @@ export async function removeShare(documentId: string, userId: string): Promise<R
   if (!data || data.length === 0) return fail("Nothing to remove.");
   return ok(null);
 }
+
+export async function deleteDocument(id: string): Promise<Result> {
+  if (!UUID_RE.test(id)) return fail("Document not found.");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("documents")
+    .delete()
+    .eq("id", id)
+    .select("id");
+  if (error) return fail("Could not delete the document.");
+  if (!data || data.length === 0) return fail("Only the owner can delete this document.");
+  return ok(null);
+}
