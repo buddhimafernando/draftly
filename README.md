@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Draftly
 
-## Getting Started
+A lightweight collaborative document editor built for the Ajaia AI-native full-stack assignment.
 
-First, run the development server:
+**Live app:** https://draftly-navy.vercel.app
+
+## Test accounts
+
+| User | Email | Password |
+|---|---|---|
+| Alice | alice.draftly@test.com | `abc@1234` |
+| Bob | bob.draftly@test.com | `abc@1234` |
+| Carol | carol.draftly@test.com | `abc@1234` |
+
+You can also create your own account on the login page. Email confirmation is disabled so sign-up is instant.
+
+**Quick way to see sharing work:** sign in as Alice, create a document, click **Share**, enter `bob.draftly@test.com` as Viewer. Sign out, sign in as Bob, and find it under **Shared with me** (read-only). Switch Bob to Editor from Alice's account and he can edit. Carol, who has no access, gets a 404 if she opens the document's URL.
+
+## Features
+
+- Create, rename, edit, save and reopen documents
+- Rich text: bold, italic, underline, H1/H2, bulleted and numbered lists
+- Autosave (debounced) with a visible save status
+- **File import:** `.txt`, `.md` and `.docx` (max 4 MB) become a new editable document. Images and complex Word layout are not preserved.
+- Sharing by email with **Viewer** or **Editor** roles; owners can change roles or remove access
+- "My documents" vs "Shared with me" lists, with role badges
+- Owners can delete documents
+- Email/password authentication
+
+## Stack
+
+Next.js (App Router) · React · TypeScript · Tailwind CSS · shadcn/ui · Tiptap · Supabase (Postgres, Auth, Row Level Security) · Vitest · Vercel
+
+## Run locally
+
+Requires Node 20.19+ (tested on 22).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <https://github.com/buddhimafernando/draftly.git> draftly && cd draftly
+npm install
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In **Authentication → Sign In / Providers → Email**, turn **off** "Confirm email".
+3. In **Project Settings → API Keys**, copy the project URL and the publishable key into `.env.local`:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+   ```
+   The URL must be the bare project URL, with no `/rest/v1/` suffix.
+4. Apply the database migrations:
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <ref>
+   npx supabase db push --remote
+   ```
+5. Start the app and sign up at http://localhost:3000:
+   ```bash
+   npm run dev
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+```
 
-## Learn More
+The suite is an RLS integration test that signs in as three real users against your Supabase project and checks that strangers, viewers and editors each get exactly the access they should. It needs users `alice.draftly@test.com`, `bob.draftly@test.com` and `carol.draftly@test.com` (create them via the sign-up page) and this in `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```
+TEST_USER_PASSWORD=<abc@1234>
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Without it the suite is skipped. Also useful: `npm run typecheck` and `npm run build`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project layout
 
-## Deploy on Vercel
+```
+src/app/            routes: login, /documents, /documents/[id], /api/import/docx
+src/components/     auth, dashboard, editor, sharing, ui (shadcn)
+src/lib/            supabase clients + session proxy, document queries/actions, file import
+supabase/migrations schema, RLS policies, sharing function, privilege grants
+tests/              RLS integration test
+docs/               architecture note, AI workflow note
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Documentation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Architecture note](docs/ARCHITECTURE.md)
+- [AI workflow note](docs/AI_WORKFLOW.md)
+- [SUBMISSION.md](SUBMISSION.md)
