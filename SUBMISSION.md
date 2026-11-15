@@ -6,7 +6,7 @@
 ## Links
 
 - **Live product:** https://draftly-navy.vercel.app
-- **Walkthrough video:** <UNLISTED-LOOM-OR-YOUTUBE-URL> (also in `walkthrough-video.txt`)
+- **Walkthrough video:** https://youtu.be/VuoKLPFZj1w
 
 ## Test accounts (for the sharing flow)
 
